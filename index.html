@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>A1/A2 車禍指標</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    h1 { margin-bottom: 10px; }
+    h2 { margin-top: 30px; color: #333; }
+    .indicator { margin-bottom: 15px; font-size: 18px; }
+    .up { color: red; font-weight: bold; }
+    .down { color: green; font-weight: bold; }
+    .note { margin-top: 30px; font-size: 14px; color: gray; }
+    .warning { color: gray; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>A1/A2 類車禍事故統計指標</h1>
+
+  <!-- A1 -->
+  <h2>🔵 A1 類</h2>
+  <div id="A1_lastMonth" class="indicator">讀取中...</div>
+  <div id="A1_prevYear" class="indicator">讀取中...</div>
+  <div id="A1_prevMonth" class="indicator">讀取中...</div>
+
+  <!-- A2 -->
+  <h2>🟠 A2 類</h2>
+  <div id="A2_lastMonth" class="indicator">讀取中...</div>
+  <div id="A2_prevYear" class="indicator">讀取中...</div>
+  <div id="A2_prevMonth" class="indicator">讀取中...</div>
+  <div id="A2_warning" class="warning"></div>
+
+  <div class="note" id="note"></div>
+
+  <script>
+    // 🎯 計算今天的前一個月
+    function getTargetMonth() {
+      const today = new Date();
+      let year = today.getFullYear();
+      let month = today.getMonth(); // getMonth() 0=1月 → 這就是「上個月」
+      if (month === 0) { // 如果今天是1月，往前就是去年12月
+        month = 12;
+        year -= 1;
+      }
+      return { year, month };
+    }
+
+    // 找「同年前一個月」
+    function getPrevMonth(year, month, data) {
+      let prevYear = year;
+      let prevMonth = month - 1;
+      if (prevMonth === 0) {
+        prevMonth = 12;
+        prevYear -= 1;
+      }
+      return data.find(d => d.year === prevYear && d.month === prevMonth) || null;
+    }
+
+    // 找「前一年同月」
+    function getPrevYearSameMonth(year, month, data) {
+      return data.find(d => d.year === year - 1 && d.month === month) || null;
+    }
+
+    // 格式化增減率 + 箭頭
+    function formatChange(curr, prev) {
+      if (!prev || prev.count === 0) return "⚠ 無資料";
+      const diff = curr.count - prev.count;
+      const rate = ((diff) / prev.count * 100).toFixed(1);
+      if (diff > 0) return `<span class="up">▲ ${rate}%</span>`;
+      if (diff < 0) return `<span class="down">▼ ${rate}%</span>`;
+      return `<span>0%</span>`;
+    }
+
+    // 主程式
+    function processData(raw, prefix) {
+      const data = [];
+      raw.forEach(d => {
+        const year = parseInt((d["發生年度"] || "").toString().trim(), 10);
+        const month = parseInt((d["發生月份"] || "").toString().trim(), 10);
+        const count = parseInt((d["件數"] || "").toString().trim(), 10);
+        if (isNaN(year) || isNaN(month) || isNaN(count)) return;
+        data.push({ year, month, count });
+      });
+
+      data.sort((a,b) => (a.year*100+a.month) - (b.year*100+b.month));
+
+      const target = getTargetMonth();
+      const latest = data.find(d => d.year === target.year && d.month === target.month);
+
+      if (!latest) {
+        document.getElementById(`${prefix}_lastMonth`).innerHTML = `⚠ ${target.year}/${target.month} 沒有資料`;
+        return;
+      }
+
+      const prevMonth = getPrevMonth(latest.year, latest.month, data);
+      const prevYearSameMonth = getPrevYearSameMonth(latest.year, latest.month, data);
+
+      document.getElementById(`${prefix}_lastMonth`).innerHTML =
+        `上個月（${latest.year}/${latest.month}）：<b>${latest.count}</b> 件`;
+
+      document.getElementById(`${prefix}_prevYear`).innerHTML =
+        prevYearSameMonth
+          ? `前一年同月（${prevYearSameMonth.year}/${prevYearSameMonth.month}）：<b>${prevYearSameMonth.count}</b> 件，增減率：${formatChange(latest, prevYearSameMonth)}`
+          : `前一年同月：⚠ 無資料`;
+
+      document.getElementById(`${prefix}_prevMonth`).innerHTML =
+        prevMonth
+          ? `同年前一月（${prevMonth.year}/${prevMonth.month}）：<b>${prevMonth.count}</b> 件，增減率：${formatChange(latest, prevMonth)}`
+          : `同年前一月：⚠ 無資料`;
+
+      // ⚠ 資料異常提醒（只做在 A2，檢查最近 12 個月）
+      if (prefix === "A2") {
+        const targetIndex = data.findIndex(d => d.year === target.year && d.month === target.month);
+        const recent = data.slice(Math.max(0, targetIndex - 11), targetIndex + 1);
+        const warnings = recent
+          .filter(d => d.count < 1000)
+          .map(d => `⚠️ 注意：${d.year} 年 ${d.month} 月 A2 類事故件數（${d.count}）可能因資料未完整上傳而偏低。`);
+        document.getElementById("A2_warning").innerHTML = warnings.join("<br>");
+      }
+    }
+
+    // 顯示基準月份
+    const t = getTargetMonth();
+    document.getElementById("note").innerText = `📅 本頁統計基準：${t.year}/${t.month}`;
+
+    // 讀取 A1_summary.csv
+    Papa.parse("./A1_summary.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        processData(results.data, "A1");
+      }
+    });
+
+    // 讀取 A2_summary.csv
+    Papa.parse("./A2_summary.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        processData(results.data, "A2");
+      }
+    });
+  </script>
+</body>
+</html>
