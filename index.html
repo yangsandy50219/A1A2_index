@@ -6,30 +6,38 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 30px; }
-    h1 { margin-bottom: 10px; }
-    h2 { margin-top: 30px; color: #333; }
+    h1 { margin-bottom: 20px; text-align: center; }
+    .container { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+    .panel { flex: 1 1 400px; max-width: 500px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; }
+    h2 { margin-top: 0; color: #333; }
     .indicator { margin-bottom: 15px; font-size: 18px; }
     .up { color: red; font-weight: bold; }
     .down { color: green; font-weight: bold; }
-    .note { margin-top: 30px; font-size: 14px; color: gray; }
-    .warning { color: gray; margin-top: 10px; }
+    .note { margin-top: 30px; font-size: 14px; color: gray; text-align: center; }
+    .warning { color: gray; margin-top: 10px; font-size: 15px; }
   </style>
 </head>
 <body>
-  <h1>A1/A2 類車禍事故統計指標</h1>
+  <h1>A1 / A2 類車禍事故統計指標</h1>
 
-  <!-- A1 -->
-  <h2>🔵 A1 類</h2>
-  <div id="A1_lastMonth" class="indicator">讀取中...</div>
-  <div id="A1_prevYear" class="indicator">讀取中...</div>
-  <div id="A1_prevMonth" class="indicator">讀取中...</div>
+  <div class="container">
+    <!-- A1 -->
+    <div class="panel">
+      <h2>🔵 A1 類</h2>
+      <div id="A1_lastMonth" class="indicator">讀取中...</div>
+      <div id="A1_prevYear" class="indicator">讀取中...</div>
+      <div id="A1_prevMonth" class="indicator">讀取中...</div>
+    </div>
 
-  <!-- A2 -->
-  <h2>🟠 A2 類</h2>
-  <div id="A2_lastMonth" class="indicator">讀取中...</div>
-  <div id="A2_prevYear" class="indicator">讀取中...</div>
-  <div id="A2_prevMonth" class="indicator">讀取中...</div>
-  <div id="A2_warning" class="warning"></div>
+    <!-- A2 -->
+    <div class="panel">
+      <h2>🟠 A2 類</h2>
+      <div id="A2_lastMonth" class="indicator">讀取中...</div>
+      <div id="A2_prevYear" class="indicator">讀取中...</div>
+      <div id="A2_prevMonth" class="indicator">讀取中...</div>
+      <div id="A2_warning" class="warning"></div>
+    </div>
+  </div>
 
   <div class="note" id="note"></div>
 
@@ -46,7 +54,6 @@
       return { year, month };
     }
 
-    // 找「同年前一個月」
     function getPrevMonth(year, month, data) {
       let prevYear = year;
       let prevMonth = month - 1;
@@ -57,12 +64,10 @@
       return data.find(d => d.year === prevYear && d.month === prevMonth) || null;
     }
 
-    // 找「前一年同月」
     function getPrevYearSameMonth(year, month, data) {
       return data.find(d => d.year === year - 1 && d.month === month) || null;
     }
 
-    // 格式化增減率 + 箭頭
     function formatChange(curr, prev) {
       if (!prev || prev.count === 0) return "⚠ 無資料";
       const diff = curr.count - prev.count;
@@ -72,7 +77,6 @@
       return `<span>0%</span>`;
     }
 
-    // 主程式
     function processData(raw, prefix) {
       const data = [];
       raw.forEach(d => {
@@ -109,7 +113,6 @@
           ? `同年前一月（${prevMonth.year}/${prevMonth.month}）：<b>${prevMonth.count}</b> 件，增減率：${formatChange(latest, prevMonth)}`
           : `同年前一月：⚠ 無資料`;
 
-      // ⚠ 資料異常提醒（只做在 A2，檢查最近 12 個月）
       if (prefix === "A2") {
         const targetIndex = data.findIndex(d => d.year === target.year && d.month === target.month);
         const recent = data.slice(Math.max(0, targetIndex - 11), targetIndex + 1);
@@ -120,11 +123,9 @@
       }
     }
 
-    // 顯示基準月份
     const t = getTargetMonth();
     document.getElementById("note").innerText = `📅 本頁統計基準：${t.year}/${t.month}`;
 
-    // 讀取 A1_summary.csv
     Papa.parse("./A1_summary.csv", {
       download: true,
       header: true,
@@ -133,7 +134,6 @@
       }
     });
 
-    // 讀取 A2_summary.csv
     Papa.parse("./A2_summary.csv", {
       download: true,
       header: true,
