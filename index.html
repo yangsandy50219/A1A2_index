@@ -1,24 +1,122 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
   <meta charset="UTF-8">
   <title>A1/A2 車禍指標</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 30px; }
-    h1 { margin-bottom: 20px; text-align: center; }
-    .container { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
-    .panel { flex: 1 1 400px; max-width: 500px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; }
-    h2 { margin-top: 0; color: #333; }
-    .indicator { margin-bottom: 15px; font-size: 18px; }
-    .up { color: red; font-weight: bold; }
-    .down { color: green; font-weight: bold; }
-    .note { margin-top: 30px; font-size: 14px; color: gray; text-align: center; }
-    .warning { color: gray; margin-top: 10px; font-size: 15px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .panel {
+      flex: 1 1 400px;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .indicator {
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .up {
+      color: red;
+      font-weight: bold;
+    }
+
+    .down {
+      color: green;
+      font-weight: bold;
+    }
+
+    .note {
+      margin-top: 30px;
+      font-size: 14px;
+      color: gray;
+      text-align: center;
+    }
+
+    .warning {
+      color: gray;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+
+    .info-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: white;
+      color: rgb(71, 134, 235);
+      padding: 8px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .info-btn .tooltip {
+      visibility: hidden;
+      opacity: 0;
+      width: 280px;
+      background-color: rgba(0,0,0,0.65);
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 10px;
+      position: absolute;
+      z-index: 10;
+      top: 40px;
+      /* 按鈕下方 */
+      left: 0;
+      transition: opacity 0.3s;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .info-btn:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
+
 <body>
   <h1>A1 / A2 類車禍事故統計指標</h1>
+
+
+  <!-- 說明按鈕 -->
+  <div class="info-btn">ⓘ 什麼是 A1/A2 類車禍？
+    <div class="tooltip">
+      <p><b>A1 類車禍：</b> 車禍當下或車禍發生 24 小時內有人死亡。</p>
+      <p><b>A2 類車禍：</b> 車禍有人員受傷或車禍發生 24 小時後有人死亡。</p>
+    </div>
+  </div>
+
 
   <div class="container">
     <!-- A1 -->
@@ -87,7 +185,7 @@
         data.push({ year, month, count });
       });
 
-      data.sort((a,b) => (a.year*100+a.month) - (b.year*100+b.month));
+      data.sort((a, b) => (a.year * 100 + a.month) - (b.year * 100 + b.month));
 
       const target = getTargetMonth();
       const latest = data.find(d => d.year === target.year && d.month === target.month);
@@ -129,7 +227,7 @@
     Papa.parse("./A1_summary.csv", {
       download: true,
       header: true,
-      complete: function(results) {
+      complete: function (results) {
         processData(results.data, "A1");
       }
     });
@@ -137,10 +235,11 @@
     Papa.parse("./A2_summary.csv", {
       download: true,
       header: true,
-      complete: function(results) {
+      complete: function (results) {
         processData(results.data, "A2");
       }
     });
   </script>
 </body>
+
 </html>
