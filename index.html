@@ -9,7 +9,6 @@
     body {
       font-family: Arial, sans-serif;
       margin: 30px;
-      position: relative;
     }
 
     h1 {
@@ -80,6 +79,13 @@
       display: inline-block;
     }
 
+    .info-text {
+      display: none;
+      /* 👈 預設不顯示文字 */
+      margin-left: 6px;
+      font-size: 14px;
+    }
+
     .info-btn .tooltip {
       visibility: hidden;
       opacity: 0;
@@ -99,53 +105,54 @@
       line-height: 1.5;
     }
 
+    .info-btn:hover .info-text {
+      display: inline;
+    }
+
     .info-btn:hover .tooltip {
       visibility: visible;
       opacity: 1;
-    }
-
-    .main-content {
-      margin-top: 80px;
-      /* 👈 你可以自己微調，例如 60px / 100px */
     }
   </style>
 </head>
 
 <body>
-  <div class="main-content">
-    <h1>A1 / A2 類車禍事故統計指標</h1>
+  <h1>A1 / A2 類車禍事故統計指標</h1>
 
 
-    <!-- 說明按鈕 -->
-    <div class="info-btn">ⓘ 什麼是 A1/A2 類車禍？
-      <div class="tooltip">
-        <p><b>A1 類車禍：</b> 車禍當下或車禍發生 24 小時內有人死亡。</p>
-        <p><b>A2 類車禍：</b> 車禍有人員受傷或車禍發生 24 小時後有人死亡。</p>
-      </div>
+  <!-- 說明按鈕 -->
+  <div class="info-btn">
+    <span class="info-icon">ⓘ</span>
+    <span class="info-text">什麼是 A1/A2 類車禍？</span>
+
+    <div class="tooltip">
+      <strong>A1類：</strong>車禍當下或車禍發生 24 小時內有人死亡。<br>
+      <strong>A2類：</strong>車禍有人員受傷或車禍發生 24 小時後有人死亡。<br>
     </div>
-
-
-    <div class="container">
-      <!-- A1 -->
-      <div class="panel">
-        <h2>🔵 A1 類</h2>
-        <div id="A1_lastMonth" class="indicator">讀取中...</div>
-        <div id="A1_prevYear" class="indicator">讀取中...</div>
-        <div id="A1_prevMonth" class="indicator">讀取中...</div>
-      </div>
-
-      <!-- A2 -->
-      <div class="panel">
-        <h2>🟠 A2 類</h2>
-        <div id="A2_lastMonth" class="indicator">讀取中...</div>
-        <div id="A2_prevYear" class="indicator">讀取中...</div>
-        <div id="A2_prevMonth" class="indicator">讀取中...</div>
-        <div id="A2_warning" class="warning"></div>
-      </div>
-    </div>
-
-    <div class="note" id="note"></div>
   </div>
+
+
+
+  <div class="container">
+    <!-- A1 -->
+    <div class="panel">
+      <h2>🔵 A1 類</h2>
+      <div id="A1_lastMonth" class="indicator">讀取中...</div>
+      <div id="A1_prevYear" class="indicator">讀取中...</div>
+      <div id="A1_prevMonth" class="indicator">讀取中...</div>
+    </div>
+
+    <!-- A2 -->
+    <div class="panel">
+      <h2>🟠 A2 類</h2>
+      <div id="A2_lastMonth" class="indicator">讀取中...</div>
+      <div id="A2_prevYear" class="indicator">讀取中...</div>
+      <div id="A2_prevMonth" class="indicator">讀取中...</div>
+      <div id="A2_warning" class="warning"></div>
+    </div>
+  </div>
+
+  <div class="note" id="note"></div>
 
   <script>
     // 🎯 計算今天的前一個月
