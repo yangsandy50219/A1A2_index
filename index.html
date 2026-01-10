@@ -223,8 +223,9 @@
   <div class="note" id="note"></div>
 
   <script>
-    /* ===== 取前兩個月 ===== */
-    function getTargetMonth(offset = 2) {
+    /* ===== 取前三個月 ===== */
+    const OFFSET = 3; // ⭐ 這裡改成 1=前1個月、2=前2個月、3=前3個月...
+    function getTargetMonth(offset = OFFSET) {
       const d = new Date();
       d.setDate(1);
       d.setMonth(d.getMonth() - offset);
@@ -289,7 +290,7 @@
     }
 
     function render(prefix, data) {
-      const target = getTargetMonth(2);
+      const target = getTargetMonth(OFFSET);
       const latest = findRecord(target.year, target.month, data);
 
       if (!latest) {
@@ -391,9 +392,9 @@
       });
     }
 
-    const t = getTargetMonth(2);
+    const t = getTargetMonth(OFFSET);
     document.getElementById("note").innerText =
-      `📅 指標統計基準：${t.year}/${t.month}（前兩個月）`;
+      `📅 指標統計基準：${t.year}/${t.month}`;
 
     loadCSV("./A1_summary.csv", "A1");
     loadCSV("./A2_summary.csv", "A2");
